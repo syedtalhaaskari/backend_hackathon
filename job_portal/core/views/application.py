@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
+from drf_yasg.utils import swagger_auto_schema
+
 from core.permissions import IsOwner
 from core.models.job_post import JobPost
 from core.models.application import Application
@@ -15,6 +17,7 @@ class UpdateApplicantStatusView(APIView):
     permission_classes = [IsAuthenticated, IsOwner]
     serializer_class = ApplicationSerializer
 
+    @swagger_auto_schema(request_body=ApplicationSerializer)
     def put(self, request, id, applicant_id):    
         try:
             job_post = JobPost.objects.get(id=id, user=request.user)

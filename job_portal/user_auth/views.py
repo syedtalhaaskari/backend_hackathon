@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 
+from drf_yasg.utils import swagger_auto_schema
+
 from core.serializers.notification import NotificationSerializer
 
 from .permissions import ProfilePermission
@@ -20,6 +22,7 @@ class LoginAPIView(APIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(request_body=LoginSerializer)
     def post(self, request: Request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -41,7 +44,8 @@ class UserAPIView(APIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
-
+    
+    @swagger_auto_schema(request_body=UserSerializer)
     def post(self, request: Request):
         try:
             data = request.data
@@ -91,6 +95,7 @@ class ChangePasswordAPIView(APIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = (IsAuthenticated,)
 
+    @swagger_auto_schema(request_body=ChangePasswordSerializer)
     def put(self, request):
         try:
             data = request.data
@@ -120,6 +125,7 @@ class ForgotPasswordAPIView(APIView):
     serializer_class = ForgotPasswordSerializer
     permission_classes = (AllowAny,)
 
+    @swagger_auto_schema(request_body=ForgotPasswordSerializer)
     def post(self, request):
         try:
             data = request.data
@@ -153,6 +159,7 @@ class ForgotPasswordEmailVerificationAPIView(APIView):
     serializer_class = ForgotPasswordEmailVerificationSerializer
     permission_classes = (AllowAny,)
 
+    @swagger_auto_schema(request_body=ForgotPasswordEmailVerificationSerializer)
     def post(self, request):
         try:
             data = request.data
