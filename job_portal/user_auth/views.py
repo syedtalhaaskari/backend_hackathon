@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -30,8 +31,11 @@ class LoginAPIView(APIView):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request, user)
-            return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         
@@ -182,4 +186,3 @@ class ForgotPasswordEmailVerificationAPIView(APIView):
             return Response({"error": 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    
