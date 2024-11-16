@@ -1,11 +1,8 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from user_auth.serializers import UserSerializer, EmployerSerializer
+from user_auth.serializers import UserSerializer
 
 from core.models.job_post import JobPost
-
-
 
 class UnAuthJobPostSerializer(serializers.ModelSerializer):
     class Meta:

@@ -7,6 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'id',
             "password",
             "last_login",
             "is_superuser",
@@ -20,6 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
             "groups",
         ]
         extra_kwargs = {
+            'id': {'read_only': True},
             'is_superuser': {'read_only': True},
             'is_staff': {'read_only': True},
             'is_active': {'read_only': True},
@@ -27,6 +29,20 @@ class UserSerializer(serializers.ModelSerializer):
             'date_joined': {'read_only': True},
             'password': {'write_only': True},
         }
+
+class ForgotPasswordEmailVerificationSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
 
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
