@@ -76,8 +76,8 @@ class JobPostViewSet(ModelViewSet):
 
         return Response("Applied Successfully", status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'])
-    def my_applications(self, request: Request, serializer_class=UserOwnAppliedApplicationSerializer, permission_classes=[IsAuthenticated, IsJobSeeker]):
+    @action(detail=False, methods=['GET'], serializer_class=UserOwnAppliedApplicationSerializer, permission_classes=[IsAuthenticated, IsJobSeeker])
+    def my_applications(self, request: Request):
         user = request.user
         applications = Application.objects.filter(job_seeker=user)
         serializer = UserOwnAppliedApplicationSerializer(applications, many=True)
