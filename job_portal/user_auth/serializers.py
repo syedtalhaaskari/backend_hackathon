@@ -30,6 +30,17 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
         }
 
+class SignUpSerializer(serializers.ModelSerializer):
+    role = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = [
+            "password",
+            "username",
+            "role",
+        ]
+
 class ForgotPasswordEmailVerificationSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)

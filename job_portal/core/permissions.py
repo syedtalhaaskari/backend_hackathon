@@ -1,8 +1,6 @@
 from rest_framework.request import Request
 from rest_framework.permissions import BasePermission
 
-from user_auth.models import Employer
-
 class IsOwner(BasePermission):
     def has_permission(self, request: Request, view):
         return request.user.groups.filter(name = 'Employer').exists() or request.user.is_superuser
@@ -22,7 +20,7 @@ class IsOwnerOrAdmin(BasePermission):
 class IsJobSeeker(BasePermission):
     def has_permission(self, request: Request, view):
         return request.user.groups.filter(name = 'Job_Seeker').exists()
-    
+
     def has_object_permission(self, request: Request, view, obj):
         return request.user.groups.filter(name = 'Job_Seeker').exists()
 

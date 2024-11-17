@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -16,7 +16,7 @@ from core.serializers.notification import NotificationSerializer
 
 from .permissions import ProfilePermission
 from .models import JobSeeker, Employer
-from .serializers import UserSerializer, LoginSerializer, JobSeekerSerializer, EmployerSerializer, ChangePasswordSerializer, ForgotPasswordSerializer, ForgotPasswordEmailVerificationSerializer
+from .serializers import SignUpSerializer, LoginSerializer, JobSeekerSerializer, EmployerSerializer, ChangePasswordSerializer, ForgotPasswordSerializer, ForgotPasswordEmailVerificationSerializer
 
 class LoginAPIView(APIView):
     queryset = User.objects.all()
@@ -46,26 +46,30 @@ class LogoutAPIView(APIView):
 
 class UserAPIView(APIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = SignUpSerializer
     permission_classes = [AllowAny]
     
-    @swagger_auto_schema(request_body=UserSerializer)
+    @swagger_auto_schema(request_body=SignUpSerializer)
     def post(self, request: Request):
         try:
             data = request.data
-
-            serializer = UserSerializer(data=data)
+            serializer = SignUpSerializer(data=data)
             
             if serializer.is_valid():
-                groups = serializer.validated_data.pop('groups')
+                role = serializer.validated_data.pop('role')
+                group = Group.objects.filter(name=role).first()
+
+                if group is None:
+                    return Response({"error": "Invalid role"}, status=status.HTTP_400_BAD_REQUEST)
+                
                 serializer.validated_data['password'] = make_password(serializer.validated_data['password'])
                 user = User.objects.create(**serializer.validated_data)
-                user.groups.set(groups)
-                for group in groups:
-                    if group.name == 'Job_Seeker':
-                        JobSeeker.objects.create(user=user)
-                    elif group.name == 'Employer':
-                        Employer.objects.create(user=user)
+
+                user.groups.set([group])
+                if group.name == 'Job_Seeker':
+                    JobSeeker.objects.create(user=user)
+                elif group.name == 'Employer':
+                    Employer.objects.create(user=user)
                 content=f"Thank you for signing up click the line below to verify your account https://www.google.com"
                 notification_obj = {
                     "user": user.id,
@@ -84,7 +88,7 @@ class ProfileModelViewSet(ModelViewSet):
     serializer_class = EmployerSerializer
     permission_classes = (ProfilePermission,)
     # pagination_class = None
-    
+
     def get_queryset(self):
         if self.request.user.groups.filter(name='Job_Seeker').count() > 0:
             return JobSeeker.objects.filter(user__id=self.request.user.id)
@@ -94,7 +98,7 @@ class ProfileModelViewSet(ModelViewSet):
         if self.request.user.groups.filter(name='Job_Seeker').count() > 0:
             return JobSeekerSerializer
         return super().get_serializer_class()
-    
+
 class ChangePasswordAPIView(APIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = (IsAuthenticated,)
