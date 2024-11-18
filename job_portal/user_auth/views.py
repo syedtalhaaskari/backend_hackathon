@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.parsers import MultiPartParser
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -83,20 +84,24 @@ class UserAPIView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
+# @swagger_auto_schema(methods=['GET', 'PUT', 'DELETE'])
 class ProfileModelViewSet(ModelViewSet):
-    queryset = Employer.objects.all()
-    serializer_class = EmployerSerializer
+    # http_method_names = ('GET', 'PUT', 'DELETE')
+    queryset = User.objects.all()
+    serializer_class = JobSeekerSerializer
     permission_classes = (ProfilePermission,)
+    parser_classes = (MultiPartParser,)
+
     # pagination_class = None
 
     def get_queryset(self):
-        if self.request.user.groups.filter(name='Job_Seeker').count() > 0:
-            return JobSeeker.objects.filter(user__id=self.request.user.id)
-        return super().get_queryset()
+        if self.request.user.groups.filter(name='Employer').count() > 0:
+            return Employer.objects.filter(user__id=self.request.user.id)
+        return JobSeeker.objects.filter(user__id=self.request.user.id)
     
     def get_serializer_class(self):
-        if self.request.user.groups.filter(name='Job_Seeker').count() > 0:
-            return JobSeekerSerializer
+        if self.request.user.groups.filter(name='Employer').count() > 0:
+            return EmployerSerializer
         return super().get_serializer_class()
 
 class ChangePasswordAPIView(APIView):

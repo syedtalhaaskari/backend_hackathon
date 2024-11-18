@@ -14,7 +14,7 @@ from core.models.job_post import JobPost
 from core.serializers.notification import NotificationSerializer
 from core.serializers.job_post import JobPostSerializer, UnAuthJobPostSerializer, JobPostToggleSerializer
 from core.serializers.application import ApplyApplicationSerializer, UserOwnAppliedApplicationSerializer
-from core.permissions import JobPostPermissions, IsJobSeeker, IsOwnerOrAdmin
+from core.permissions import JobPostPermissions, IsJobSeeker, IsOwnerOrAdmin, IsEmployer
 
 from user_auth.serializers import UserSerializer
 
@@ -36,14 +36,14 @@ class JobPostViewSet(ModelViewSet):
             return UnAuthJobPostSerializer
         return super().get_serializer_class()
     
-    @action(detail=False, methods=['GET'])
+    @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated, IsEmployer])
     def my_jobs(self, request: Request):
         user = request.user
         job_posts = JobPost.objects.filter(user=user)
         serializer = JobPostSerializer(job_posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=True, methods=['PUT'], serializer_class=JobPostToggleSerializer)
+    @action(detail=True, methods=['PUT'], serializer_class=JobPostToggleSerializer, permission_classes=[IsAuthenticated, IsOwnerOrAdmin])
     def toggle(self, request: Request, pk=None):
         job_posts = JobPost.objects.get(pk=pk)
         job_posts.is_enabled = not job_posts.is_enabled

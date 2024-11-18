@@ -10,6 +10,7 @@ class JobSeeker(models.Model):
     city = models.CharField(max_length=255, blank=True, null=True)
     profile_image = models.CharField(max_length=255, blank=True, null=True)
     cv = models.CharField(max_length=255, blank=True, null=True)
+    cv_file = models.FileField(upload_to=f'cv/', blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     
     def __str__(self) -> str:

@@ -10,7 +10,9 @@ class ProfilePermission(BasePermission):
         return True
     
     def has_object_permission(self, request: Request, view, obj):
-        if request.user.id == obj.user.id and request.method == 'PUT':
+        if request.method in ['GET']:
+            return True
+        if request.user.id == obj.user.id and request.method in ['PUT', 'PATCH']:
             return True
 
         if request.user.id == obj.user.id or request.user.is_superuser:

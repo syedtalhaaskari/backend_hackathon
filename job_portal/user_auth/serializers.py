@@ -65,13 +65,29 @@ class LoginSerializer(serializers.ModelSerializer):
         }
 
 class JobSeekerSerializer(serializers.ModelSerializer):
-    http_method_names = ('GET', 'DELETE', 'PUT')
+    http_method_names = ('GET', 'PUT', 'DELETE')
     class Meta:
+        ref_name = 'Job Seeker'
         model = JobSeeker
-        fields = '__all__'
+        fields = [
+            'id',
+            'gender',
+            'date_of_birth',
+            'qualification',
+            'country',
+            'city',
+            'profile_image',
+            'cv_file'
+        ]
+        read_only_fields = [
+            'id',
+        ]
 
 class EmployerSerializer(serializers.ModelSerializer):
     http_method_names = ('GET', 'DELETE', 'PUT')
     class Meta:
         model = Employer
         fields = '__all__'
+        read_only_fields = [
+            'id',
+        ]

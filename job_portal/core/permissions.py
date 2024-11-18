@@ -24,6 +24,13 @@ class IsJobSeeker(BasePermission):
     def has_object_permission(self, request: Request, view, obj):
         return request.user.groups.filter(name = 'Job_Seeker').exists()
 
+class IsEmployer(BasePermission):
+    def has_permission(self, request: Request, view):
+        return request.user.groups.filter(name = 'Employer').exists()
+
+    def has_object_permission(self, request: Request, view, obj):
+        return request.user.groups.filter(name = 'Employer').exists()
+
 class JobPostPermissions(BasePermission):
     def has_permission(self, request: Request, view):
         if request.method == 'GET':
