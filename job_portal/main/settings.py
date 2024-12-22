@@ -183,3 +183,7 @@ SWAGGER_SETTINGS = {
         'patch'
     ],
 }
+
+import os
+MEDIA_URL = '/assets/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'assets')

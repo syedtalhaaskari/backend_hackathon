@@ -84,7 +84,7 @@ class JobSeekerSerializer(serializers.ModelSerializer):
         ]
 
 class EmployerSerializer(serializers.ModelSerializer):
-    http_method_names = ('GET', 'DELETE', 'PUT')
+    http_method_names = ('GET', 'DELETE', 'PUT', 'PATCH')
     class Meta:
         model = Employer
         fields = '__all__'

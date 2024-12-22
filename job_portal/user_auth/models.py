@@ -8,8 +8,7 @@ class JobSeeker(models.Model):
     qualification = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=255, blank=True, null=True)
-    profile_image = models.CharField(max_length=255, blank=True, null=True)
-    cv = models.CharField(max_length=255, blank=True, null=True)
+    profile_image = models.FileField(upload_to=f'profile_image/', blank=True, null=True)
     cv_file = models.FileField(upload_to=f'cv/', blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     
@@ -23,7 +22,7 @@ class Employer(models.Model):
     date_of_birth = models.DateField(blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=255, blank=True, null=True)
-    logo = models.CharField(max_length=255, blank=True, null=True)
+    profile_image = models.ImageField(upload_to=f'profile_image/', blank=True, null=True)
     company_size= models.CharField(max_length=255, blank=True, null=True)
     
     is_verified = models.BooleanField(default=False)
