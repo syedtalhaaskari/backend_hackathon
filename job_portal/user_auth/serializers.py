@@ -39,6 +39,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             "password",
             "username",
             "role",
+            "email"
         ]
 
 class ForgotPasswordEmailVerificationSerializer(serializers.Serializer):

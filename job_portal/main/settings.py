@@ -184,6 +184,7 @@ SWAGGER_SETTINGS = {
     ],
 }
 
+# For Images and Files
 import os
 MEDIA_URL = '/assets/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'assets')
