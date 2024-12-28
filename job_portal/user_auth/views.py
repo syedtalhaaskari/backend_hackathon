@@ -1,6 +1,14 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User, Group
+# For Email Verification
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import EmailMessage
+from django.shortcuts import redirect, render
+from django.contrib import messages
 
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -18,6 +26,8 @@ from core.serializers.notification import NotificationSerializer
 from .permissions import ProfilePermission
 from .models import JobSeeker, Employer
 from .serializers import SignUpSerializer, LoginSerializer, JobSeekerSerializer, EmployerSerializer, ChangePasswordSerializer, ForgotPasswordSerializer, ForgotPasswordEmailVerificationSerializer
+# For Email Verification
+from .token import account_activation_token
 
 class LoginAPIView(APIView):
     queryset = User.objects.all()
@@ -44,6 +54,53 @@ class LogoutAPIView(APIView):
     def post(self, request: Request):
         logout(request)
         return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+
+def verify_email(request, user):
+    current_site = get_current_site(request)
+
+    username = user.username
+    email = user.email
+    subject = "Verify Email"
+    message = render_to_string('user_auth/verify_email_message.html', {
+        'request': request,
+        'user': username,
+        'domain': current_site.domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.id)),
+        'token': account_activation_token.make_token(user),
+    })
+    email = EmailMessage(
+        subject, message, to=[email]
+    )
+    email.content_subtype = 'html'
+    email.send()
+
+def verify_email_done(request):
+    return render(request, 'user_auth/verify_email_done.html')
+
+def verify_email_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        if user.groups.filter(name='Employer').count() > 0:
+            emp = Employer.objects.get(user__id = uid)
+            emp.is_verified = True
+            emp.save()
+        else:
+            emp = JobSeeker.objects.get(user__id = uid)
+            emp.is_verified = True
+            emp.save()
+        messages.success(request, 'Your email has been verified.')
+        return redirect('verify-email-complete')
+    else:
+        messages.warning(request, 'The link is invalid.')
+    return render(request, 'user_auth/verify_email_confirm.html')
+
+def verify_email_complete(request):
+    return render(request, 'user_auth/verify_email_complete.html')
 
 class UserAPIView(APIView):
     queryset = User.objects.all()
@@ -72,6 +129,7 @@ class UserAPIView(APIView):
                 elif group.name == 'Employer':
                     Employer.objects.create(user=user)
                 content=f"Thank you for signing up click the line below to verify your account https://www.google.com"
+                verify_email(request, user)
                 notification_obj = {
                     "user": user.id,
                     "content": content,

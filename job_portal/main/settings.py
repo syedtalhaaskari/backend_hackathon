@@ -63,7 +63,7 @@ ROOT_URLCONF = 'main.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -188,3 +188,20 @@ SWAGGER_SETTINGS = {
 import os
 MEDIA_URL = '/assets/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'assets')
+
+# For Sending Emails
+# importing os module for environment variables
+import os
+# importing necessary functions from dotenv library
+from dotenv import load_dotenv, dotenv_values 
+# loading variables from .env file
+load_dotenv() 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = os.getenv('EMAIL')
+EMAIL_HOST_PASSWORD = os.getenv('PASSWORD') # Remove it and never share it with anyone
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = f"Jawan Pakistan {os.getenv('EMAIL')}"
