@@ -253,3 +253,11 @@ class ForgotPasswordEmailVerificationAPIView(APIView):
             return Response({"error": 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+from django.contrib.auth.views import PasswordResetView
+from django.urls import reverse_lazy
+
+class CustomPasswordResetView(PasswordResetView):
+    email_template_name = 'registration/password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
+    template_name = 'registration/password_reset_form.html'
